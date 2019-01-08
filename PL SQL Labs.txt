@@ -1,0 +1,410 @@
+
+--1st script --
+begin
+    dbms_output.put_line('Hello World');
+    dbms_output.put_line('------------------');
+end;
+/
+
+To make verify off:
+set verify off;
+
+to make console on for print:
+set serveroutput on;
+
+--- take 2 numbers from user and print their sum --
+declare
+a number;
+b number;
+
+begin
+    a:=&a;
+    b:=&b;
+    dbms_output.put_line('Sum is ' || (a+b));
+    dbms_output.put_line('------------------');
+end;
+/
+
+-- take 3 numbers from user and print their max --
+--- take 3 numbers from user and print their max --
+declare
+a number;
+b number;
+c number;
+m number;
+begin
+    a:=&a;
+    b:=&b;
+    c:=&c;
+    if a>b and a>c then m:=a;
+    elsif b>c then m:=b;
+    else  m:=b;
+    end if;
+    dbms_output.put_line('Max is ' || m);
+    dbms_output.put_line('------------------');
+end;
+/
+
+--------------using case -- end case
+--- take 3 numbers from user and print their max --
+declare
+a number;
+b number;
+c number;
+m number;
+begin
+    a:=&a;
+    b:=&b;
+    c:=&c;
+    case
+    when a>b and a>c then m:=a;
+    when b>c then m:=b;
+    else  m:=b;
+    end case;
+    dbms_output.put_line('Max is ' || m);
+    dbms_output.put_line('------------------');
+end;
+/
+==== Loop===
+--- print 1 .. 10 --
+declare
+i number :=1;
+begin
+    loop
+    dbms_output.put_line(i);
+    i := i+1;
+    exit when i>10;
+    end loop;
+    dbms_output.put_line('------------------');
+end;
+/
+
+=== For loop--- print 1 .. 10 --
+declare
+i number;
+begin
+    for i in 1..10 
+    loop
+      dbms_output.put_line(i);
+    end loop;
+    dbms_output.put_line('------------------');
+end;
+/
+
+=== For loop--- print 1 .. 10 in reverse--
+declare
+i number;
+begin
+    for i in reverse 1..10 
+    loop
+      dbms_output.put_line(i);
+    end loop;
+    dbms_output.put_line('------------------');
+end;
+/
+
+
+===========
+SQL> create table testtran (
+  2  eid number not null primary key,
+  3  ename varchar(20),
+  4  age number);
+
+========= 
+
+declare
+i number ;
+begin
+   for i in 1..10
+    loop
+     insert into testtran values (i,'Ram'||i, i+10);
+    end loop;
+    dbms_output.put_line('------------------');
+end;
+/
+=============================
+Procedure
+----------------
+create or replace procedure proc1 is
+i number ;
+begin
+   for i in 1..10
+    loop
+     insert into testtran values (10+i,'Ram'||i, i+10);
+    end loop;
+    dbms_output.put_line('------------------');
+end;
+/
+
+
+To run your procedure : exec proc1;
+
+===========Parameterized procedure==========
+create or replace procedure proc1 ( data in number )is
+i number  ;
+begin
+   for i in 1..10
+    loop
+     insert into testtran values ( (i+data),'Ram'||(i+data), i+data+10);
+    end loop;
+    dbms_output.put_line('------------------');
+end;
+/
+
+To run your procedure :   exec proc1(22);
+
+===========================Procedure with In & Out Parameters ====
+create or replace procedure proc2 ( a in number ,b in number , c out number) is
+begin
+ c := a+b;
+end;
+/
+
+var result number;
+exec proc2(12,23,:result);
+print result;
+
+============================Procedure with In Out Parameters ====
+create or replace procedure proc3 ( a in out number) is
+begin
+ a := a*2;
+end;
+/
+
+print result;
+exec proc3(:result);
+print result;
+exec proc3(:result);
+print result;
+exec proc3(:result);
+print result;
+
+=== create a procedure that takes empid as in paramter 
+and name & salary will return as out parameter
+
+
+create table emp (empno int not null primary key , ename varchar(20), deptname varchar(10), salary int);
+
+insert into emp values (1,'Raja','Sales', 12000);
+insert into emp values (2,'Rajesh','Admin', 42000);
+insert into emp values (3,'Rajat','Sales', 22000);
+commit;
+
+
+design a procedure that takes empnumber as input and returns name and his/her salary.
+==============================
+
+create or replace procedure proc4 ( a in number , b out char, c out number) is
+begin
+ select ename,salary into b,c from emp where empno=a;
+end;
+/
+
+sql>var name char(20);
+sql>var sal number;
+sql>exec proc4(2,:name,:sal);
+sql>print name;
+sql>print sal;
+
+select ename,salary  from emp where empno=1;
+
+
+
+
+
+
+======================Functions in Oracle -------
+
+create or replace function fun1(dno number) return number is
+begin
+return dno * 2;
+end;
+/
+
+to execute function , we can use also-
+select   fun1(12) from dual;
+
+
+==to find factorial ==
+
+create or replace function fun2(n number) return number is
+fact number :=1;
+begin
+for i in 2..n
+loop
+  fact :=fact*i;
+end loop;
+return fact;
+end;
+/
+
+to execute function , we can use also-
+select   fun2(5) from dual;
+
+=============================  Oracle Package ===================
+--CREATE THE PACKAGE
+create or replace package pack1 as
+function adding(n number,y number) return number;
+procedure show(n number,y number);
+end;
+/
+
+--DEFINE PACKAGE BODY
+create or replace package body PACK1
+IS
+function adding(n number,y number) return number
+is
+begin
+return n+y;
+end;
+
+procedure show(n number,y number) 
+is
+begin
+dbms_output.put_line(n+y);
+end;
+end;
+/
+=======SQL>  exec pack1.show(12,23)
+       SQL>  select pack1.adding(12,23) from dual;     
+
+
+=====================================================Triggers====================
+CREATE TABLE TAB1 ( ID INT , NAME VARCHAR(10), sal int);
+
+CREATE TABLE TABS (  NAME VARCHAR(10), TDATE DATE);
+
+---Row Level Trigger ----
+
+create or replace trigger trig1 AFTER INSERT on TAB1 
+for each row
+begin
+INSERT INTO TABS VALUES (user ,SYSDATE);	
+end;
+/
+
+select * from tab1;
+select * from tabs;
+
+insert into tab1 values (1,'Raj',12000);
+insert into tab1 values (2,'Raja',22000);
+
+select * from tab1;
+select * from tabs;
+
+insert into tab1 values (11,'Raj',12000),(22,'Raja',22000);
+
+-- Statement level trigger----
+create or replace trigger trig2 AFTER update on TAB1 
+begin
+INSERT INTO TABS VALUES ('Update' ,SYSDATE);	
+end;
+/
+
+select * from tab1;
+select * from tabs;
+update tab1 set sal = sal+10 where sal>20000;
+select * from tab1;
+select * from tabs;
+==========================
+select * from tab1;
+select * from tabs;
+alter trigger trig2 disable;
+update tab1 set sal = sal+10 where sal>20000;
+select * from tab1;
+select * from tabs;
+alter trigger trig2 enable;
+update tab1 set sal = sal+10 where sal>20000;
+select * from tab1;
+select * from tabs;
+==============================
+SQL> create table logtab (
+  2  id int ,
+  3  oldname varchar(30),
+  4  newname varchar(30),
+  5  cdate date
+  6  );
+
+create or replace trigger trig2 AFTER update on TAB1 
+for each row
+begin
+INSERT INTO LOGTAB VALUES (:old.ID, :old.NAME, :new.NAME,SYSDATE);	
+end;
+/
+
+select * from tab1;
+select * from logtab;
+update tab1 set name='dibakar' where id=10;
+select * from tab1;
+select * from logtab;
+  
+=================================
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
